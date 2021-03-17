@@ -15,8 +15,6 @@ d88'      `?88P'`88b`?888P'd88' `?88P'`88b  88b    d88'      d88' d88'   88b`?88
                                                                         By {creator}
 '''
 
-# C:\Users\jsonr\Documents\Programming\jayson.jpg
-
 options = [
     'Dibujar rasgos faciales en fotos',
     'Comparar tu foto con nuestro registro',

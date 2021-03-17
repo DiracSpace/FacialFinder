@@ -45,7 +45,7 @@ def DrawingLandmarks(filename: str):
 
 def HighlightFacialFeatures():
     try:
-        dirname = os.path.dirname('programming')
+        dirname = os.path.dirname('FacialFinder')
         img_name = input("¿Qué nombre tiene? -> ")
         for ext in img_heuristics:
             filename = os.path.join(dirname, f'dataset\{img_name}.{ext}')
