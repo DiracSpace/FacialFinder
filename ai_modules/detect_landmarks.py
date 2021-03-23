@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from PIL import Image, ImageDraw
-import face_recognition
-import os
 
 '''
     Este módulo se encarga de buscar entre los archivos dentro de la carpeta /dataset.
@@ -18,10 +15,15 @@ img_heuristics = [
 ]
 
 def CheckExistence(filepath: str) -> bool:
+    import os
+
     return True if os.path.isfile(filepath) else False
 
 def DrawingLandmarks(filename: str):
     try:
+        from PIL import Image, ImageDraw
+        import face_recognition
+        
         # loading image to traing ai
         img = face_recognition.load_image_file(filename)
         
@@ -45,6 +47,8 @@ def DrawingLandmarks(filename: str):
 
 def HighlightFacialFeatures():
     try:
+        import os
+        
         dirname = os.path.dirname('FacialFinder')
         img_name = input("¿Qué nombre tiene? -> ")
         for ext in img_heuristics:

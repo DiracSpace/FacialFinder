@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from ai_modules import detect_landmarks
-from ai_modules import detect_faces
-from ai_modules import detect_faces_webcam
 
 creator = 'DiracSpace'
 logo = f'''
@@ -31,10 +28,16 @@ def Main():
     selection = int(input("¿Qué desea hacer? -> "))
     
     if selection == 0:
+        from ai_modules import detect_landmarks
+
         detect_landmarks.HighlightFacialFeatures()
     elif selection == 1:
+        from ai_modules import detect_faces
+
         detect_faces.ImageComparison()
     elif selection == 2:
+        from ai_modules import detect_faces_webcam
+        
         detect_faces_webcam.WebcamCapture()
 
 

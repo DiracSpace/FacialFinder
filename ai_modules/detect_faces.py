@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import face_recognition
-from glob import glob
-import os
 
 '''
     Este módulo se encarga de leer todas las imágenes debajo de dataset
@@ -14,13 +12,17 @@ import os
 
 def GetDataset() -> dict:
     try:
+        import os
+
         path = os.path.abspath('dataset')
         name = []
         image_encoding = []
         for image in os.listdir(path):
             name.append(image)
             image = face_recognition.load_image_file(path + '\\' + image)
-            image_encoding.append(face_recognition.face_encodings(image)[0])
+            image_encoding.append(
+                face_recognition.face_encodings(image)[0]
+            )
         return dict(
             zip(name, image_encoding)
         )
@@ -29,8 +31,9 @@ def GetDataset() -> dict:
 
 def GetComparisonEncoding(path: str) -> list:
     try:
-        # comparison_image = face_recognition.load_image_file(path)
-        return face_recognition.face_encodings (
+        import face_recognition
+
+        return face_recognition.face_encodings(
             face_recognition.load_image_file(path)
         )
     except Exception as err:
@@ -38,6 +41,8 @@ def GetComparisonEncoding(path: str) -> list:
 
 def ImageComparison():
     try:
+        from glob import glob
+
         # get the name and encoding for every image in dataset
         resultset = GetDataset()
 
@@ -65,7 +70,7 @@ def ImageComparison():
                     tolerance=0.6
                 )
 
-                # for some reason and IndexOutOfBounds Exception
+                # for some reason an IndexOutOfBounds Exception
                 # pops up, so it detects when a positive match
                 # shows and gracefully exits without breaking. Hopefully
                 if results[index]:
