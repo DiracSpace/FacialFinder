@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-from collections import OrderedDict
-import face_recognition
-import numpy as np
-import cv2
-import os
+import face_recognition, cv2
 
 '''
     Este módulo se encarga de leer todas las imágenes debajo de dataset
@@ -14,8 +10,16 @@ import os
     DiracSpace
 '''
 
-def GetDataset() -> dict:
+img_heuristics = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+]
+
+def GetDataset():
     try:
+        import os
+
         # initiating local variables
         path = os.path.abspath('dataset')
         name = []
@@ -25,32 +29,31 @@ def GetDataset() -> dict:
         # folder to repeat the process of
         # reading N images and there names for keys
         for image_name in os.listdir(path):
-            # saving the image name
-            name.append(image_name)
+            # saving the image name without extension
+            name.append(image_name[:image_name.index(".")])
 
             # loading the image and saving the encoding
             image_filepath = face_recognition.load_image_file(path + '\\' + image_name)
 
             # since the images have one face, get the first value
             # in returning list of encodings
-            image_encoding.append(face_recognition.face_encodings(image_filepath)[0])
-
-        # returning a dictionary and
-        # zipping a list with the
-        # image name as the key,
-        # and image encoding as value
-        return OrderedDict(
-            zip(
-                name,
-                image_encoding
+            image_encoding.append(
+                face_recognition.face_encodings(image_filepath)[0]
             )
-        )
+
+        # returning list with image names (includes extension)
+        # and image encodings
+        return name, image_encoding
     except Exception as err:
-        print(f'¡Oh no! Error -> {err}')
+        print(f'¡Oh no! Error obteniendo encodings -> {err}')
 
 def WebcamCapture():
     try:
-        resultSet = GetDataset()
+        import numpy as np
+
+        # getting the required data
+        known_face_names, known_face_encodings = GetDataset()
+
         face_locations = []
         face_encodings = []
         face_names = []
@@ -103,56 +106,80 @@ def WebcamCapture():
                 # encodings
                 face_names = []
                 try:
-                    for key in resultSet:
-                        current_image = resultSet.get(key)
-                        for face_encoding in face_encodings:
-                            print (face_encoding)
+                    for face_encoding in face_encodings:
+                        matches = face_recognition.compare_faces(
+                            known_face_encodings,
+                            face_encoding
+                        )
+                        name = "Unknown"
+
+                        face_distances = face_recognition.face_distance(
+                            known_face_encodings,
+                            face_encoding
+                        )
+                        best_match_index = np.argmin(face_distances)
+
+                        if matches[best_match_index]:
+                            name = known_face_names[best_match_index]
+                        face_names.append(name)
                 except IndexError as ie:
                     print (f'¡Oh no! Te saliste de la lista -> {ie}')
                     exit()
             _frame = not _frame
 
             # displaying the results
-            for (top, right, bottom, left), name in zip(face_locations, face_names):
-                # return the scale of frame to original size
-                top *= 4
-                left *= 4
-                right *= 4
-                bottom *= 4
+            try:
+                for (top, right, bottom, left), name in zip(face_locations, face_names):
+                    # return the scale of frame to original size
+                    top *= 4
+                    left *= 4
+                    right *= 4
+                    bottom *= 4
 
-                # draw box aroung the face
-                cv2.rectangle(
-                    frame,
-                    (left, top),
-                    (right, bottom),
-                    (0, 0, 255),
-                    2
-                )
+                    # draw box aroung the face
+                    cv2.rectangle(
+                        frame,
+                        (left, top),
+                        (right, bottom),
+                        (0, 0, 255),
+                        2
+                    )
 
-                # draw a label for name
-                cv2.rectangle(
-                    frame,
-                    (left, bottom - 35),
-                    (right, bottom),
-                    (0, 0, 255),
-                    cv2.FILLED
-                )
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(
-                    frame,
-                    name,
-                    (left + 6, bottom - 6),
-                    font,
-                    1.0,
-                    (255, 255, 255),
-                    1
-                )
+                    # draw a label for name
+                    cv2.rectangle(
+                        frame,
+                        (left, bottom - 35),
+                        (right, bottom),
+                        (0, 0, 255),
+                        cv2.FILLED
+                    )
+                    font = cv2.FONT_HERSHEY_DUPLEX
+
+                    # insert the text into label
+                    cv2.putText(
+                        frame,
+                        name,
+                        (left + 6, bottom - 6),
+                        font,
+                        1.0,
+                        (255, 255, 255),
+                        1
+                    )
+            except Exception as err_display:
+                print(f'¡Oh no! Error graficando -> {err_display}')
+            # add the edited frame back into the 
+            # display
             cv2.imshow("Facial Finder", frame)
+            
+            # waiting for key pressing
             key = cv2.waitKey(20)
 
             # detect ESC on keyboard to leave cycle
             if key == 27:
                 break
+        # release and destroy all
+        # instances of video capturing 
+        # or else it will be occupied in next run
         video_capture.release()
         cv2.destroyWindow("Facial Finder")
         print('')
